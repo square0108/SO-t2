@@ -14,6 +14,8 @@ struct ThreadArgs {
         unsigned int stage_count; 
 };
 
+pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 // funcion que simula "hacer algo" esperando y luego prueba acceder al monitor
 void* test_monitor(void* thread_args) 
 {
@@ -27,16 +29,25 @@ void* test_monitor(void* thread_args)
         long rand_sleep = random();
         unsigned int sleep_time = MICROSECS_SLEEP + (MICROSECS_VARIANCE - 2*(rand_sleep & MICROSECS_VARIANCE));
         usleep(sleep_time);
-        printf("[Thread %lu - ID %lu] esperando en etapa %u\n", id, pthread_self(), monitor->stage+1);
-        wait(monitor);
-        printf("[Thread %lu - ID %lu] pasó barrera en etapa %u\n", id, pthread_self(), monitor->stage);
-    }
 
+        pthread_mutex_lock(&print_mutex);
+        printf("[Thread %lu - ID %lu] esperando en etapa %lu\n", id, pthread_self(), stage+1);
+        pthread_mutex_unlock(&print_mutex);
+
+        wait(monitor);
+
+        pthread_mutex_lock(&print_mutex);
+        printf("[Thread %lu - ID %lu] pasó barrera en etapa %lu\n", id, pthread_self(), stage+1);
+        pthread_mutex_unlock(&print_mutex);
+    }
+    
+    free(thread_args);
     return NULL;
 }
 
 int main(int argc, char* argv[]) 
 {
+    srandom(time(NULL));
     // parseo
     size_t thread_count = (argc < 2) ? 5 : atoi(argv[1]);
     unsigned int stage_count = (argc < 3) ? 4 : atoi(argv[2]);

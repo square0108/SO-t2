@@ -14,19 +14,22 @@ void barrier_monitor_init(BarrierMonitor *monitor, size_t N)
 void wait(BarrierMonitor* monitor) 
 {
     pthread_mutex_lock(&monitor->mutex);
+    unsigned int thread_stage = monitor->stage;
     monitor->count++;
 
-    // aunque mesa sea mas recomendado, aca sirve hoare porque es un problema simple, en donde se
-    // puede asegurar facilmente que se liberen todos cuando la condicion se rompe y se devuelva todo al inicio
-    if (monitor->count < monitor->N) {
+    // usamos monitor mesa para asegurar que las hebras solo avancen si verdaderamente se cumplió
+    // la stage.
+    while (monitor->count < monitor->N && monitor->stage == thread_stage) {
         pthread_cond_wait(&monitor->cond, &monitor->mutex);
     }
-    else {
+
+    if (monitor->count == monitor->N) {
         // aca entra cuando count == N, es decir, la barrier ya tiene todos los threads que necesita
         // se reinicia todo y se manda el broadcast para liberar los threads
         monitor->stage++;
         monitor->count = 0;
         pthread_cond_broadcast(&monitor->cond);
+
     }
 
     // aca se debe hacer todo lo que se queria hacer con el monitor, pero como es solo implementar
