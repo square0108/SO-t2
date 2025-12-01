@@ -46,7 +46,7 @@ int insert_to_pt(struct PageTable* pt, unsigned int address_vpn, struct PageTabl
       return 0;
     }
     else if ((*search_result)->vpn == address_vpn) { // HIT de insercion..
-      // Actualizar existente
+      // Actualizar existente (esto no debería llegar a utilizarse en el simulador?)
       (*search_result)->pfn = new_pte->pfn;
       (*search_result)->valid = new_pte->valid;
       (*search_result)->reference = new_pte->reference;
@@ -87,20 +87,19 @@ unsigned int assign_frame(struct PageFrameList* frlist, struct PageTableEntry* e
 * Libera un marco de página expulsando a una P.V. según el algoritmo "Reloj", y retorna la posición apuntada por la mano de reloj que fue liberada.
 */
 size_t evict_page(struct PageFrameList* frlist) {
-  size_t clock_start = frlist->clock_idx;
-  do {
+  while(1) {
     struct PageTableEntry* candidate = frlist->pte_map[frlist->clock_idx];
     if (candidate->reference == 0) {
       break;
     }
+    // dar "segunda chance" si la pagina es popular/recientemente referenciada
     else {
       if (DEBUG_MODE) fprintf(stdout, "Second chance triggered: VPN: %#x; PFN: %#x; Clock hand: %lu\n", candidate->vpn, candidate->pfn, (frlist->clock_idx));
-      candidate->reference = 0; // segunda chance
+      candidate->reference = 0;
     }
-
     // Mover mano de reloj (implementa "lista circular")
     frlist->clock_idx = (frlist->clock_idx + 1) % frlist->n_frames;
-  } while (clock_start != frlist->clock_idx); // reloj dio un "loop" de vuelta a su posicion inicial. Si no liberó ningún marco, simplemente liberará el mismo con el que empezó
+  }
   struct PageTableEntry* victim = frlist->pte_map[frlist->clock_idx];
   size_t victim_idx = frlist->clock_idx;
 
