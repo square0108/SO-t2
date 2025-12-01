@@ -28,7 +28,7 @@ void wait(BarrierMonitor* monitor)
         pthread_cond_broadcast(&monitor->cond);
     }
 
-    // aca se debe hacer todo lo que se queria hacer con el barrier, pero como es solo implementar
+    // aca se debe hacer todo lo que se queria hacer con el monitor, pero como es solo implementar
     // wait(), no se hace nada
 
     pthread_mutex_unlock(&monitor->mutex);
