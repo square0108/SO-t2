@@ -7,7 +7,7 @@ make clean
 make
 ```
 
-El siguiente comando ejecuta el test de berrera con 5 hebras y 3 etapas:
+El siguiente comando ejecuta el test de barrera con 5 hebras y 3 etapas:
 ```bash
 ./barr 5 3
 ```
