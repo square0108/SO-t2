@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #define PT_INIT_SIZE 8193
 
+_Bool DEBUG_MODE = 0;
+
 // Manejo y asignacion de marcos de pagina
 
 /*
@@ -67,7 +69,7 @@ unsigned int assign_frame(struct PageFrameList* frlist, struct PageTableEntry* e
     if (frlist->claimed_frames[idx] == 0) {
       frlist->claimed_frames[idx] = 1;
       frlist->pte_map[idx] = entry;
-      entry->pfn = frlist->frames[idx][0];
+      entry->pfn = frlist->frames[idx];
       entry->valid = 1;
       entry->reference = 1;
       return entry->pfn;
@@ -88,22 +90,23 @@ size_t evict_page(struct PageFrameList* frlist) {
   size_t clock_start = frlist->clock_idx;
   do {
     struct PageTableEntry* candidate = frlist->pte_map[frlist->clock_idx];
-
     if (candidate->reference == 0) {
       break;
     }
-    else candidate->reference = 0; // segunda chance
+    else {
+      if (DEBUG_MODE) fprintf(stdout, "Second chance triggered: VPN: %#x; PFN: %#x; Clock hand: %lu\n", candidate->vpn, candidate->pfn, (frlist->clock_idx));
+      candidate->reference = 0; // segunda chance
+    }
 
     // Mover mano de reloj (implementa "lista circular")
     frlist->clock_idx = (frlist->clock_idx + 1) % frlist->n_frames;
   } while (clock_start != frlist->clock_idx); // reloj dio un "loop" de vuelta a su posicion inicial. Si no liberó ningún marco, simplemente liberará el mismo con el que empezó
-
   struct PageTableEntry* victim = frlist->pte_map[frlist->clock_idx];
   size_t victim_idx = frlist->clock_idx;
-  // Invalidar página
+
+  // Invalidar página expulsada
   if (victim != NULL) {
     victim->valid = 0;
-    victim->pfn = 0;
   }
   // actualizar data de frame list
   frlist->claimed_frames[victim_idx] = 0;
@@ -135,11 +138,10 @@ struct PageFrameList* init_PageFrameList(size_t n_frames, size_t page_size) {
   list->claimed_frames = calloc(n_frames,sizeof(_Bool));
 
   // Reservar `n_frames` marcos de página, y reservar `page_size` direcciones físicas por cada marco de página
-  list->frames = malloc(sizeof(unsigned int*)*n_frames);
   list->pte_map = calloc(n_frames, sizeof(struct PageTableEntry*));
+  list->frames = (unsigned int*) calloc(n_frames, sizeof(unsigned int));
   for (size_t i = 0; i < n_frames; i++) {
-    list->frames[i] = calloc(page_size, sizeof(unsigned int));
-    (list->frames[i])[0] = (unsigned int) i; // valores de ejemplo para cada marco físico
+    list->frames[i] = (unsigned int) i; // valores de ejemplo para cada marco físico
   }
   // Asigna "mano de reloj" de clock algorithm a primer marco
   list->clock_idx = 0;

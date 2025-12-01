@@ -30,7 +30,7 @@ struct PageTableEntry {
 */
 struct PageFrameList {
   size_t n_frames;
-  unsigned int** frames;
+  unsigned int* frames;
   size_t clock_idx;
   _Bool* claimed_frames; // En realidad deberia usar una free list, pero no hay tiempo
   size_t page_size;
