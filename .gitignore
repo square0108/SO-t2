@@ -56,3 +56,7 @@ dkms.conf
 
 # vs cope
 .vscode
+
+# compile commands y carpeta qla para el LSP
+compile_commands.json
+.cache/
