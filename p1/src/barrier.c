@@ -1,4 +1,5 @@
 #include "../inc/barrier.h"
+#include <pthread.h>
 
 void barrier_monitor_init(BarrierMonitor *monitor, size_t N) 
 {
@@ -32,4 +33,10 @@ void wait(BarrierMonitor* monitor)
     // wait(), no se hace nada
 
     pthread_mutex_unlock(&monitor->mutex);
+}
+
+void barrier_monitor_destroy(BarrierMonitor *monitor)
+{
+    pthread_mutex_destroy(&monitor->mutex);
+    pthread_cond_destroy(&monitor->cond);
 }

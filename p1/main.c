@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
     for (unsigned int stage = 0; stage < stage_count; stage++) 
     {
-        // por cada etapa, se crean hilos y se ejecuta el test
+        // por cada etapa, se crean hebras y se ejecuta el test
         for (size_t thrd = 0; thrd < thread_count; thrd++) 
         {
             pthread_create(&threads[thrd], NULL, test_monitor, &monitor);
@@ -49,4 +49,5 @@ int main(int argc, char* argv[])
             pthread_join(threads[thrd], NULL);
         }
     }
+    barrier_monitor_destroy(&monitor);
 }
