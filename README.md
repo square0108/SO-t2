@@ -24,5 +24,5 @@ Para leer trazas de memoria en formato `.txt`, el simulador se ejecuta como:
 ```
 
 - Si el tamaño de página ingresado no es una potencia de 2, se redondeará a la menor más cercana.
-- `--verbose` imprimirá a la consola información adicional (hit/miss, números de página virtual y de marco utilizado, 
+- `--verbose` imprimirá a la consola información adicional (hit/miss, números de página virtual y de marco utilizado)
 - Las trazas disponibles se encuentran en `p2/traces/`.
