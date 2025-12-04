@@ -11,10 +11,15 @@ make
 
 #### Parte 1: Sincronización con barrera
 
-El siguiente comando ejecuta el test de barrera con 5 hebras y 3 etapas:
+El siguiente comando ejecuta un test básico de la barrera:
+```bash
+./barr <núm. de hebras> <núm. de etapas>
+```
+Por ejemplo, con 5 hebras y 3 etapas:
 ```bash
 ./barr 5 3
 ```
+Cada hebra imprime en consola su progreso a través de las etapas.
 
 #### Parte 2: Simulador de memoria virtual
 
